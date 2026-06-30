@@ -22,8 +22,8 @@ export function getRedis(): Redis {
       logger.info('Redis connected');
     });
 
-    redisClient.on('error', (err) => {
-      logger.error('Redis error:', err.message);
+    redisClient.on('error', (err: any) => {
+      logger.error(`Redis error: ${err?.message || err}`);
     });
   }
   return redisClient;
@@ -31,7 +31,7 @@ export function getRedis(): Redis {
 
 export async function connectRedis(): Promise<void> {
   const redis = getRedis();
-  await redis.connect();
+  await redis.ping();
 }
 
 export async function disconnectRedis(): Promise<void> {

@@ -14,6 +14,13 @@ const KNOWLEDGE_BASE = {
   payment: `Payment Options:
 - We accept UPI, Credit/Debit cards (Visa, Mastercard, RuPay), and MakeMyLook Wallet.
 - Pay-at-salon is available for selected vendors.`,
+  
+  services: `Available Services:
+- Hair Care: Haircuts, Coloring, Styling, Extensions, Treatments
+- Skin Care: Facials, Threading, Waxing, Bleach, Cleanup
+- Body Care: Spa, Massage, Body Polishing
+- Makeup: Bridal, Party, Airbrush
+- Specialized: Mehndi, Tattoo, Nail Art`,
 };
 
 export class SupportTool {
@@ -31,6 +38,8 @@ export class SupportTool {
       result = KNOWLEDGE_BASE.refund;
     } else if (lowerQuery.includes('pay') || lowerQuery.includes('upi')) {
       result = KNOWLEDGE_BASE.payment;
+    } else if (lowerQuery.includes('service') || lowerQuery.includes('what do you do') || lowerQuery.includes('book')) {
+      result = KNOWLEDGE_BASE.services;
     }
 
     if (result) {

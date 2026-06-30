@@ -8,25 +8,16 @@ interface CacheOptions {
 
 class CacheManager {
   private memoryCache: LRUCache<string, string>;
-  private isRedisAvailable = false;
+  private get isRedisAvailable(): boolean {
+    const redis = getRedis();
+    return redis.status === 'ready';
+  }
 
   constructor() {
     this.memoryCache = new LRUCache({
       max: 10000,
       ttl: 1000 * 60 * 60, // Default 1 hour memory TTL
     });
-
-    this.checkRedis();
-  }
-
-  private async checkRedis() {
-    try {
-      const redis = getRedis();
-      await redis.ping();
-      this.isRedisAvailable = true;
-    } catch {
-      this.isRedisAvailable = false;
-    }
   }
 
   async get<T>(key: string): Promise<T | null> {
@@ -37,7 +28,6 @@ class CacheManager {
         if (data) return JSON.parse(data) as T;
       }
     } catch (error) {
-      this.isRedisAvailable = false;
       logger.warn(`Redis GET failed for ${key}, falling back to memory`, { error });
     }
 
@@ -60,7 +50,6 @@ class CacheManager {
         await redis.setex(key, options.ttlSeconds, stringValue);
       }
     } catch (error) {
-      this.isRedisAvailable = false;
       logger.warn(`Redis SET failed for ${key}, falling back to memory`, { error });
     }
   }

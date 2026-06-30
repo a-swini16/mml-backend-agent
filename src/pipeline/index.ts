@@ -40,7 +40,7 @@ export class Pipeline {
 
     // 3. Parallel Tool Execution
     const toolStart = Date.now();
-    if (onStream) onStream('thinking', { status: 'Analyzing request...' });
+    if (onStream) onStream('thinking', { status: 'Just a second, let me check the details for you...' });
 
     let lat = request.latitude || session.preferences.latitude;
     let lng = request.longitude || session.preferences.longitude;
@@ -57,7 +57,8 @@ export class Pipeline {
       message: request.message,
       intent: route.intent,
       latitude: lat,
-      longitude: lng
+      longitude: lng,
+      onStream
     });
     
     // Save location to preferences if we found one
@@ -80,7 +81,7 @@ export class Pipeline {
 
     // 4. LLM Generation
     const llmStart = Date.now();
-    if (onStream) onStream('thinking', { status: 'Generating response...' });
+    if (onStream) onStream('thinking', { status: 'Preparing your answer...' });
 
     let fullMessage = '';
 

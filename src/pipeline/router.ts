@@ -2,7 +2,7 @@ import { openai } from '../config/openai';
 import { config } from '../config';
 import { logger } from '../utils/logger';
 
-export type Intent = 'greeting' | 'vendor_search' | 'support_faq' | 'unknown';
+export type Intent = 'greeting' | 'vendor_search' | 'support_faq' | 'coupons' | 'services' | 'diagnostic' | 'count' | 'unknown';
 
 export interface RouteResult {
   intent: Intent;
@@ -11,10 +11,13 @@ export interface RouteResult {
 }
 
 export class FastRouter {
-  // Ultra-fast regex patterns
   private static greetingPattern = /^(hi|hello|hey|hii|heya|namaste|pranam|hello+)\b/i;
   private static vendorPattern = /\b(salon|spa|makeup|bridal|hair|cut|tattoo|mehendi|threading|massage|facial|beauty|parlor|find|search)\b/i;
-  private static supportPattern = /\b(refund|cancel|payment|upi|policy|money|return|book|booking)\b/i;
+  private static supportPattern = /\b(refund|cancel|payment|upi|policy|money|return)\b/i;
+  private static couponPattern = /\b(coupon|coupons|discount|offer|promo)\b/i;
+  private static servicePattern = /\b(service|services|what do you do)\b/i;
+  private static diagnosticPattern = /\b(book|booking error|cant book|can't book|unable to book)\b/i;
+  private static countPattern = /\b(how many|count)\b/i;
 
   static async route(message: string): Promise<RouteResult> {
     const text = message.trim();
@@ -24,19 +27,12 @@ export class FastRouter {
       return { intent: 'greeting', confidence: 1.0 };
     }
 
-    let vendorScore = 0;
-    let supportScore = 0;
-
-    if (this.vendorPattern.test(text)) vendorScore += 0.6;
-    if (this.supportPattern.test(text)) supportScore += 0.6;
-
-    if (vendorScore > supportScore && vendorScore >= 0.6) {
-      return { intent: 'vendor_search', confidence: vendorScore };
-    }
-    
-    if (supportScore > vendorScore && supportScore >= 0.6) {
-      return { intent: 'support_faq', confidence: supportScore };
-    }
+    if (this.countPattern.test(text)) return { intent: 'count', confidence: 0.9 };
+    if (this.couponPattern.test(text)) return { intent: 'coupons', confidence: 0.9 };
+    if (this.servicePattern.test(text)) return { intent: 'services', confidence: 0.9 };
+    if (this.diagnosticPattern.test(text)) return { intent: 'diagnostic', confidence: 0.9 };
+    if (this.supportPattern.test(text)) return { intent: 'support_faq', confidence: 0.9 };
+    if (this.vendorPattern.test(text)) return { intent: 'vendor_search', confidence: 0.7 };
 
     // 2. LLM Fallback (only if confidence < 0.8 / unknown)
     return this.llmRoute(text);
@@ -50,7 +46,7 @@ export class FastRouter {
         messages: [
           {
             role: 'system',
-            content: `Classify the user intent into one of: ["greeting", "vendor_search", "support_faq"]. Output ONLY the intent word.`
+            content: `Classify the user intent into one of: ["greeting", "vendor_search", "support_faq", "coupons", "services", "diagnostic", "count"]. Output ONLY the intent word.`
           },
           { role: 'user', content: message }
         ],
