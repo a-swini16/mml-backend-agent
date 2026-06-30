@@ -47,7 +47,7 @@ export class LocationTool {
 
       if (!response.ok) return null;
 
-      const data = await response.json();
+      const data = await response.json() as any[];
       if (data && data.length > 0) {
         const coords = {
           latitude: parseFloat(data[0].lat),
